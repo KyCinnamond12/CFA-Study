@@ -1112,6 +1112,7 @@ function FlashcardMatch({ scope, onHome }) {
                   color: '#0f1f3d',
                   fontFamily: '"Playfair Display", Georgia, serif',
                   fontWeight: 400,
+                  whiteSpace: 'pre-line',
                 }}
               >
                 {current.definition}
@@ -1158,6 +1159,598 @@ function FlashcardMatch({ scope, onHome }) {
       <p className="text-center text-[11px] text-slate-400 mt-4 tracking-wide">
         {flipped ? 'Mark your confidence below' : 'Flip to see the definition, then mark your confidence'}
       </p>
+    </div>
+  )
+}
+
+// ─── Crossword ─────────────────────────────────────────────────────────────────
+
+const CW_SIZE = 20
+
+function buildCrosswordClues(scope) {
+  if (scope === 'all') {
+    const pool = Object.values(QUESTION_BANK).flatMap(t => t.crossword ?? [])
+    return [...pool].sort(() => Math.random() - 0.5).slice(0, 15)
+  }
+  return [...(QUESTION_BANK[scope]?.crossword ?? [])].sort(() => Math.random() - 0.5)
+}
+
+function cwCanPlace(answer, row, col, dir, grid) {
+  const len = answer.length
+  if (dir === 'across') {
+    if (col < 0 || col + len > CW_SIZE || row < 0 || row >= CW_SIZE) return false
+    if (col > 0 && grid[row][col - 1] !== null) return false
+    if (col + len < CW_SIZE && grid[row][col + len] !== null) return false
+  } else {
+    if (row < 0 || row + len > CW_SIZE || col < 0 || col >= CW_SIZE) return false
+    if (row > 0 && grid[row - 1][col] !== null) return false
+    if (row + len < CW_SIZE && grid[row + len][col] !== null) return false
+  }
+  for (let i = 0; i < len; i++) {
+    const r = dir === 'across' ? row : row + i
+    const c = dir === 'across' ? col + i : col
+    const existing = grid[r][c]
+    if (existing !== null && existing !== answer[i]) return false
+    if (existing === null) {
+      if (dir === 'across') {
+        if (r > 0 && grid[r - 1][c] !== null) return false
+        if (r < CW_SIZE - 1 && grid[r + 1][c] !== null) return false
+      } else {
+        if (c > 0 && grid[r][c - 1] !== null) return false
+        if (c < CW_SIZE - 1 && grid[r][c + 1] !== null) return false
+      }
+    }
+  }
+  return true
+}
+
+function cwScore(answer, row, col, dir, grid) {
+  let s = 0
+  for (let i = 0; i < answer.length; i++) {
+    const r = dir === 'across' ? row : row + i
+    const c = dir === 'across' ? col + i : col
+    if (grid[r][c] === answer[i]) s++
+  }
+  return s
+}
+
+function generateCrossword(clues) {
+  const grid = Array(CW_SIZE).fill(null).map(() => Array(CW_SIZE).fill(null))
+  const placed = []
+  const sorted = [...clues].sort((a, b) => b.answer.length - a.answer.length)
+  const MID = 9
+
+  const first = sorted[0]
+  const c0 = Math.max(0, Math.floor((CW_SIZE - first.answer.length) / 2))
+  for (let i = 0; i < first.answer.length; i++) grid[MID][c0 + i] = first.answer[i]
+  placed.push({ ...first, row: MID, col: c0, dir: 'across' })
+
+  for (let wi = 1; wi < sorted.length && placed.length < 15; wi++) {
+    const word = sorted[wi]
+    const ans = word.answer
+    let best = null, bestScore = -1
+    const preferDir = placed.length % 2 === 1 ? 'down' : 'across'
+    const dirs = [preferDir, preferDir === 'down' ? 'across' : 'down']
+
+    for (const dir of dirs) {
+      for (let li = 0; li < ans.length; li++) {
+        for (const pw of placed) {
+          if (pw.dir === dir) continue
+          for (let pi = 0; pi < pw.answer.length; pi++) {
+            if (pw.answer[pi] !== ans[li]) continue
+            const row = dir === 'across' ? pw.row + pi : pw.row - li
+            const col = dir === 'across' ? pw.col - li : pw.col + pi
+            if (!cwCanPlace(ans, row, col, dir, grid)) continue
+            const sc = cwScore(ans, row, col, dir, grid)
+            if (sc > bestScore) { bestScore = sc; best = { row, col, dir } }
+          }
+        }
+      }
+    }
+
+    if (best) {
+      const { row, col, dir } = best
+      for (let i = 0; i < ans.length; i++) {
+        const r = dir === 'across' ? row : row + i
+        const c = dir === 'across' ? col + i : col
+        grid[r][c] = ans[i]
+      }
+      placed.push({ ...word, row, col, dir })
+    }
+  }
+
+  // Number by reading order
+  const startMap = new Map()
+  for (const w of placed) {
+    const k = `${w.row},${w.col}`
+    if (!startMap.has(k)) startMap.set(k, [])
+    startMap.get(k).push(w)
+  }
+  const sortedKeys = [...startMap.keys()].sort((a, b) => {
+    const [ar, ac] = a.split(',').map(Number)
+    const [br, bc] = b.split(',').map(Number)
+    return ar !== br ? ar - br : ac - bc
+  })
+  let num = 1
+  const np = placed.map(w => ({ ...w }))
+  for (const key of sortedKeys) {
+    for (const w of startMap.get(key)) {
+      const idx = np.findIndex(nw => nw.row === w.row && nw.col === w.col && nw.dir === w.dir)
+      if (idx >= 0) np[idx].number = num
+    }
+    num++
+  }
+
+  // Bounds with padding
+  let minRow = CW_SIZE, maxRow = 0, minCol = CW_SIZE, maxCol = 0
+  for (const w of np) {
+    const er = w.dir === 'across' ? w.row : w.row + w.answer.length - 1
+    const ec = w.dir === 'across' ? w.col + w.answer.length - 1 : w.col
+    minRow = Math.min(minRow, w.row); maxRow = Math.max(maxRow, er)
+    minCol = Math.min(minCol, w.col); maxCol = Math.max(maxCol, ec)
+  }
+  minRow = Math.max(0, minRow - 1); maxRow = Math.min(CW_SIZE - 1, maxRow + 1)
+  minCol = Math.max(0, minCol - 1); maxCol = Math.min(CW_SIZE - 1, maxCol + 1)
+
+  const acrossWords = np.filter(w => w.dir === 'across').sort((a, b) => a.number - b.number)
+  const downWords   = np.filter(w => w.dir === 'down').sort((a, b) => a.number - b.number)
+  return { grid, placed: np, acrossWords, downWords, bounds: { minRow, maxRow, minCol, maxCol } }
+}
+
+function cwCells(word) {
+  return Array.from({ length: word.answer.length }, (_, i) => ({
+    row: word.dir === 'across' ? word.row : word.row + i,
+    col: word.dir === 'across' ? word.col + i : word.col,
+  }))
+}
+
+function cwWordsAt(row, col, placed) {
+  return placed.filter(w => cwCells(w).some(c => c.row === row && c.col === col))
+}
+
+function CrosswordPuzzle({ scope, onHome }) {
+  const [phase, setPhase]               = useState('start')
+  const [puzzle, setPuzzle]             = useState(null)
+  const [userInput, setUserInput]       = useState({})
+  const [feedback, setFeedback]         = useState({})
+  const [activeWord, setActiveWord]     = useState(null)
+  const [activeCell, setActiveCell]     = useState(null)
+  const [seconds, setSeconds]           = useState(0)
+  const [running, setRunning]           = useState(false)
+  const [wordsRevealed, setWordsRevealed] = useState(0)
+  const [revealedSet, setRevealedSet]   = useState(new Set())
+  const [history, setHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cfa_crossword_history') || '[]') } catch { return [] }
+  })
+  const gridRef  = useRef(null)
+  const secRef   = useRef(0)
+  const revRef   = useRef(0)
+  const timerRef = useRef(null)
+
+  useEffect(() => { revRef.current = wordsRevealed }, [wordsRevealed])
+
+  useEffect(() => {
+    if (running) {
+      timerRef.current = setInterval(() => {
+        setSeconds(s => { const n = s + 1; secRef.current = n; return n })
+      }, 1000)
+    } else {
+      clearInterval(timerRef.current)
+    }
+    return () => clearInterval(timerRef.current)
+  }, [running])
+
+  // Completion detection
+  useEffect(() => {
+    if (phase !== 'playing' || !puzzle) return
+    const done = puzzle.placed.every(w =>
+      cwCells(w).every((c, i) => {
+        const k = `${c.row},${c.col}`
+        const fb = feedback[k]
+        return fb === 'revealed' || fb === 'correct' || (userInput[k] || '') === w.answer[i]
+      })
+    )
+    if (!done) return
+    setRunning(false)
+    const scopeLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
+    const score = Math.max(0, 100 - revRef.current * 10)
+    const attempt = {
+      date: new Date().toLocaleDateString(),
+      topic: scopeLabel,
+      time: fmtTime(secRef.current),
+      timeSeconds: secRef.current,
+      score,
+      wordsRevealed: revRef.current,
+    }
+    setHistory(prev => {
+      const next = [attempt, ...prev].slice(0, 50)
+      localStorage.setItem('cfa_crossword_history', JSON.stringify(next))
+      return next
+    })
+    setPhase('complete')
+  }, [userInput, feedback]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function fmtTime(s) {
+    return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
+  }
+
+  function startPuzzle() {
+    const clues = buildCrosswordClues(scope)
+    const result = generateCrossword(clues)
+    if (result.placed.length < 5) { startPuzzle(); return }
+    setPuzzle(result)
+    setUserInput({}); setFeedback({})
+    setActiveWord(result.acrossWords[0] ?? result.downWords[0] ?? null)
+    setActiveCell(result.acrossWords[0]
+      ? { row: result.acrossWords[0].row, col: result.acrossWords[0].col }
+      : null)
+    secRef.current = 0; setSeconds(0)
+    revRef.current = 0; setWordsRevealed(0)
+    setRevealedSet(new Set())
+    setRunning(true)
+    setPhase('playing')
+    setTimeout(() => gridRef.current?.focus(), 100)
+  }
+
+  function selectCell(row, col) {
+    const words = cwWordsAt(row, col, puzzle.placed)
+    if (!words.length) return
+    let chosen
+    if (words.length === 1) {
+      chosen = words[0]
+    } else if (activeWord && words.includes(activeWord)) {
+      chosen = words.find(w => w !== activeWord) ?? words[0]
+    } else {
+      chosen = words.find(w => w.dir === 'across') ?? words[0]
+    }
+    setActiveWord(chosen)
+    setActiveCell({ row, col })
+    gridRef.current?.focus()
+  }
+
+  function moveCaret(word, row, col, delta) {
+    const cells = cwCells(word)
+    const idx = cells.findIndex(c => c.row === row && c.col === col)
+    const next = cells[Math.max(0, Math.min(cells.length - 1, idx + delta))]
+    setActiveCell({ row: next.row, col: next.col })
+  }
+
+  function handleKeyDown(e) {
+    if (!activeWord || !activeCell) return
+    const { row, col } = activeCell
+    const k = `${row},${col}`
+    const up = e.key.toUpperCase()
+
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const all = [...(puzzle.acrossWords), ...(puzzle.downWords)].sort((a, b) => a.number - b.number)
+      const idx = all.findIndex(w => w === activeWord)
+      const next = all[(idx + 1) % all.length]
+      setActiveWord(next); setActiveCell({ row: next.row, col: next.col })
+      return
+    }
+    if (e.key === 'Backspace') {
+      e.preventDefault()
+      if (feedback[k] === 'revealed') { moveCaret(activeWord, row, col, -1); return }
+      if (userInput[k]) {
+        setUserInput(prev => { const n = { ...prev }; delete n[k]; return n })
+        setFeedback(prev => { const n = { ...prev }; delete n[k]; return n })
+      } else {
+        moveCaret(activeWord, row, col, -1)
+      }
+      return
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { e.preventDefault(); moveCaret(activeWord, row, col,  1); return }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    { e.preventDefault(); moveCaret(activeWord, row, col, -1); return }
+
+    if (/^[A-Za-z]$/.test(e.key)) {
+      e.preventDefault()
+      if (feedback[k] === 'revealed') { moveCaret(activeWord, row, col, 1); return }
+      setUserInput(prev => ({ ...prev, [k]: up }))
+      setFeedback(prev => { const n = { ...prev }; delete n[k]; return n })
+      moveCaret(activeWord, row, col, 1)
+    }
+  }
+
+  function checkAnswers() {
+    if (!puzzle) return
+    const newInput = { ...userInput }
+    const newFb    = { ...feedback }
+    for (const w of puzzle.placed) {
+      cwCells(w).forEach((c, i) => {
+        const k = `${c.row},${c.col}`
+        if (newFb[k] === 'revealed') return
+        const typed = newInput[k] || ''
+        if (!typed) return
+        if (typed === w.answer[i]) { newFb[k] = 'correct' }
+        else { delete newInput[k]; delete newFb[k] }
+      })
+    }
+    setUserInput(newInput); setFeedback(newFb)
+  }
+
+  function revealWord() {
+    if (!activeWord) return
+    const wKey = `${activeWord.dir}-${activeWord.number}`
+    const newInput = { ...userInput }
+    const newFb    = { ...feedback }
+    cwCells(activeWord).forEach((c, i) => {
+      const k = `${c.row},${c.col}`
+      if (newFb[k] !== 'revealed') { newInput[k] = activeWord.answer[i]; newFb[k] = 'revealed' }
+    })
+    setUserInput(newInput); setFeedback(newFb)
+    if (!revealedSet.has(wKey)) {
+      setRevealedSet(prev => new Set([...prev, wKey]))
+      const next = revRef.current + 1
+      revRef.current = next; setWordsRevealed(next)
+    }
+  }
+
+  function revealAll() {
+    if (!puzzle) return
+    const newInput = {}, newFb = {}
+    let newly = 0
+    for (const w of puzzle.placed) {
+      const wKey = `${w.dir}-${w.number}`
+      cwCells(w).forEach((c, i) => {
+        const k = `${c.row},${c.col}`
+        newInput[k] = w.answer[i]; newFb[k] = 'revealed'
+      })
+      if (!revealedSet.has(wKey)) newly++
+    }
+    const total = revRef.current + newly
+    revRef.current = total; setWordsRevealed(total)
+    setUserInput(newInput); setFeedback(newFb)
+    setRunning(false)
+  }
+
+  function isWordDone(word) {
+    return cwCells(word).every((c, i) => {
+      const k = `${c.row},${c.col}`
+      const fb = feedback[k]
+      return fb === 'revealed' || fb === 'correct' || (userInput[k] || '') === word.answer[i]
+    })
+  }
+
+  function cellBg(row, col) {
+    const k = `${row},${col}`
+    const fb = feedback[k]
+    const isActive = activeCell?.row === row && activeCell?.col === col
+    const inWord   = activeWord && cwCells(activeWord).some(c => c.row === row && c.col === col)
+    if (fb === 'correct')  return '#bbf7d0'
+    if (fb === 'revealed') return '#bfdbfe'
+    if (isActive)          return '#c8a84b'
+    if (inWord)            return '#dbeafe'
+    return '#faf8f3'
+  }
+
+  // ── START SCREEN ────────────────────────────────────────────────────────────
+  if (phase === 'start') {
+    const best = history.length > 0 ? {
+      time:  history.reduce((b, h) => (h.timeSeconds ?? 9999) < (b.timeSeconds ?? 9999) ? h : b),
+      score: history.reduce((b, h) => h.score > b.score ? h : b),
+    } : null
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-8 py-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: '#fef3c7' }}>✏️</div>
+              <div>
+                <h2 className="font-serif text-xl font-bold text-[#0f1f3d]">CFA Crossword</h2>
+                <p className="text-xs text-slate-400 tracking-wide">Fill the grid using CFA concepts</p>
+              </div>
+            </div>
+            {best && (
+              <div className="flex gap-4 mb-6">
+                <div className="flex-1 rounded-xl p-4 text-center" style={{ background: '#faf8f3', border: '1px solid #e8e0cc' }}>
+                  <p className="text-[10px] tracking-widest text-slate-400 mb-1 font-semibold">BEST TIME</p>
+                  <p className="font-mono text-xl font-bold" style={{ color: '#c8a84b' }}>{best.time.time}</p>
+                </div>
+                <div className="flex-1 rounded-xl p-4 text-center" style={{ background: '#faf8f3', border: '1px solid #e8e0cc' }}>
+                  <p className="text-[10px] tracking-widest text-slate-400 mb-1 font-semibold">BEST SCORE</p>
+                  <p className="font-mono text-xl font-bold" style={{ color: '#c8a84b' }}>{best.score.score}%</p>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={startPuzzle}
+              className="w-full py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #c8a84b, #a07830)' }}
+            >
+              Generate Puzzle
+            </button>
+          </div>
+        </div>
+
+        {history.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-serif text-sm font-bold text-[#0f1f3d]">Past Attempts</h3>
+              <button
+                onClick={() => { setHistory([]); localStorage.removeItem('cfa_crossword_history') }}
+                className="text-[11px] text-slate-400 hover:text-red-400 transition-colors"
+              >Clear History</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[12px]">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    {['Date', 'Topic', 'Time', 'Score'].map(h => (
+                      <th key={h} className="text-left px-5 py-2 text-slate-400 font-medium">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h, i) => (
+                    <tr key={i} className="border-b border-slate-50 last:border-0">
+                      <td className="px-5 py-2.5 text-slate-500">{h.date}</td>
+                      <td className="px-5 py-2.5 text-slate-600 font-medium">{h.topic}</td>
+                      <td className="px-5 py-2.5 font-mono text-[#0f1f3d]">{h.time}</td>
+                      <td className="px-5 py-2.5 font-semibold" style={{ color: h.score >= 80 ? '#059669' : h.score >= 50 ? '#c8a84b' : '#dc2626' }}>
+                        {h.score}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── COMPLETE SCREEN ─────────────────────────────────────────────────────────
+  if (phase === 'complete') {
+    const finalScore = Math.max(0, 100 - wordsRevealed * 10)
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center">
+        <div className="text-5xl mb-4">🎉</div>
+        <h2 className="font-serif text-3xl font-bold text-[#0f1f3d] mb-2">Puzzle Complete!</h2>
+        <p className="text-slate-400 text-sm mb-8">You filled in the entire grid</p>
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {[
+            { label: 'TIME',     value: fmtTime(seconds) },
+            { label: 'SCORE',    value: `${finalScore}%` },
+            { label: 'REVEALED', value: String(wordsRevealed) },
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-white rounded-xl p-4 border border-slate-100 text-center">
+              <p className="text-[9px] tracking-widest text-slate-400 mb-1 font-semibold">{label}</p>
+              <p className="font-mono text-xl font-bold text-[#0f1f3d]">{value}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <button onClick={startPuzzle}
+            className="flex-1 py-3.5 rounded-xl font-bold text-white text-sm transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #c8a84b, #a07830)' }}>
+            New Puzzle
+          </button>
+          <button onClick={onHome}
+            className="flex-1 py-3.5 rounded-xl font-semibold text-sm text-[#0f1f3d] bg-white border border-slate-200">
+            Back to Home
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── PLAYING SCREEN ──────────────────────────────────────────────────────────
+  if (!puzzle) return null
+  const { placed, acrossWords, downWords, bounds, grid } = puzzle
+  const { minRow, maxRow, minCol, maxCol } = bounds
+  const CELL = 34
+  const gridH = (maxRow - minRow + 1) * CELL
+  const cellNum = (r, c) => placed.find(w => w.row === r && w.col === c)?.number
+
+  return (
+    <div style={{ maxWidth: 980, margin: '0 auto', padding: '20px 16px' }}>
+      {/* Timer + Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <span style={{ fontFamily: 'monospace', fontSize: 26, fontWeight: 700, color: '#c8a84b', letterSpacing: 1 }}>
+          {fmtTime(seconds)}
+        </span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[
+            { label: 'Check Answers', action: checkAnswers, dark: false },
+            { label: 'Reveal Word',   action: revealWord,   dark: false },
+            { label: 'Reveal All',    action: revealAll,    dark: true  },
+          ].map(btn => (
+            <button key={btn.label} onClick={btn.action} style={{
+              padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              background: btn.dark ? '#0f1f3d' : '#ffffff',
+              border: btn.dark ? '1.5px solid #0f1f3d' : '1.5px solid #cbd5e1',
+              color: btn.dark ? '#fff' : '#334155',
+            }}>
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid + Clues */}
+      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+        {/* Grid */}
+        <div
+          ref={gridRef}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          style={{ outline: 'none', flexShrink: 0, lineHeight: 0, border: '2px solid #0f1f3d', display: 'inline-block' }}
+        >
+          {Array.from({ length: maxRow - minRow + 1 }, (_, ri) => {
+            const row = minRow + ri
+            return (
+              <div key={row} style={{ display: 'flex' }}>
+                {Array.from({ length: maxCol - minCol + 1 }, (_, ci) => {
+                  const col = minCol + ci
+                  const isWhite = grid[row][col] !== null
+                  const num = isWhite ? cellNum(row, col) : null
+                  const letter = isWhite ? (userInput[`${row},${col}`] || '') : ''
+                  const bg = isWhite ? cellBg(row, col) : '#0f1f3d'
+                  return (
+                    <div key={col} onClick={() => isWhite && selectCell(row, col)} style={{
+                      width: CELL, height: CELL, background: bg, position: 'relative',
+                      borderRight: '1px solid ' + (isWhite ? '#94a3b8' : '#0f1f3d'),
+                      borderBottom: '1px solid ' + (isWhite ? '#94a3b8' : '#0f1f3d'),
+                      cursor: isWhite ? 'pointer' : 'default',
+                      boxSizing: 'border-box', userSelect: 'none',
+                    }}>
+                      {num != null && (
+                        <span style={{ position: 'absolute', top: 1, left: 2, fontSize: 7, fontWeight: 700, color: '#1e293b', lineHeight: 1 }}>
+                          {num}
+                        </span>
+                      )}
+                      {letter && (
+                        <span style={{
+                          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 14, fontWeight: 700, color: '#0f1f3d', fontFamily: 'Georgia, serif',
+                        }}>
+                          {letter}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Clues panel */}
+        <div style={{ flex: 1, minWidth: 0, maxHeight: gridH + 4, overflowY: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {[
+            { label: 'ACROSS', words: acrossWords, prefix: 'a' },
+            { label: 'DOWN',   words: downWords,   prefix: 'd' },
+          ].map(({ label, words, prefix }) => (
+            <div key={label}>
+              <p style={{ fontSize: 10, letterSpacing: '0.1em', fontWeight: 700, color: '#0f1f3d', marginBottom: 6 }}>{label}</p>
+              {words.map(w => {
+                const done   = isWordDone(w)
+                const isAct  = activeWord === w
+                return (
+                  <button key={`${prefix}${w.number}`}
+                    onClick={() => { setActiveWord(w); setActiveCell({ row: w.row, col: w.col }); gridRef.current?.focus() }}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer',
+                      padding: '4px 8px', borderRadius: 6, marginBottom: 2,
+                      background: isAct ? '#fef3c7' : 'transparent',
+                      border: isAct ? '1px solid #c8a84b' : '1px solid transparent',
+                    }}
+                  >
+                    <span style={{ fontSize: 11, color: isAct ? '#92400e' : '#475569', lineHeight: 1.4 }}>
+                      <strong>{w.number}.</strong>{' '}
+                      <span style={{ textDecoration: done ? 'line-through' : 'none', opacity: done ? 0.4 : 1 }}>
+                        {w.clue}
+                      </span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -1216,6 +1809,8 @@ export default function GameModePage({ mode, scope, topic, onBack }) {
           <SuddenDeath scope={scope} onHome={goHome} />
         ) : mode.id === 'flashcard' ? (
           <FlashcardMatch scope={scope} onHome={goHome} />
+        ) : mode.id === 'crossword' ? (
+          <CrosswordPuzzle scope={scope} onHome={goHome} />
         ) : (
           /* ── Placeholder for other modes ── */
           <div className="flex flex-col items-center text-center py-8">
