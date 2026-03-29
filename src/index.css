@@ -21,6 +21,13 @@ body {
 ::-webkit-scrollbar-thumb { background: rgba(15,31,61,0.15); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(15,31,61,0.3); }
 
+/* KaTeX equation overflow */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
 /* Card flip */
 .card-flip-container { perspective: 1200px; }
 .card-flip-inner {

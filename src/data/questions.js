@@ -468,7 +468,7 @@ export const QUESTION_BANK = {
       {
         term: "Covered Interest Rate Parity (CIP)",
         definition:
-          "The forward exchange rate is determined by the spot rate adjusted for the interest rate differential between two currencies. CIP is enforced by arbitrage and holds in liquid markets: F = S × (1 + r_d) / (1 + r_f).",
+          "The forward exchange rate is determined by the spot rate adjusted for the interest rate differential between two currencies. CIP is enforced by arbitrage and holds in liquid markets: $F = S \\times \\frac{1+r_d}{1+r_f}$.",
       },
       {
         term: "Uncovered Interest Rate Parity (UIP)",
@@ -744,7 +744,7 @@ export const QUESTION_BANK = {
       {
         term: "Mean-Reverting Level",
         definition:
-          "In a covariance-stationary AR(1) model X_t = b₀ + b₁X_{t-1}, the long-run equilibrium level to which the series reverts: b₀ / (1 − b₁). Only meaningful when |b₁| < 1; undefined when b₁ = 1 (unit root).",
+          "In a covariance-stationary AR(1) model $X_t = b_0 + b_1 X_{t-1}$, the long-run equilibrium level to which the series reverts: $\\frac{b_0}{1 - b_1}$. Only meaningful when $|b_1| < 1$; undefined when $b_1 = 1$ (unit root).",
       },
       {
         term: "Adjusted R² vs. AIC/BIC",
@@ -1202,12 +1202,12 @@ export const QUESTION_BANK = {
       {
         term: "MM Proposition I (with taxes)",
         definition:
-          "With corporate taxes, the value of a levered firm exceeds the unlevered firm by the present value of the interest tax shield: V_L = V_U + t × D. Each dollar of permanent debt adds t cents of firm value through the tax shield on interest payments.",
+          "With corporate taxes, the value of a levered firm exceeds the unlevered firm by the present value of the interest tax shield: $V_L = V_U + t \\times D$. Each dollar of permanent debt adds $t$ cents of firm value through the tax shield on interest payments.",
       },
       {
         term: "MM Proposition II (with taxes)",
         definition:
-          "The cost of equity increases with leverage: k_e = k_0 + (k_0 − k_d)(1 − t)(D/E). As debt increases, equity becomes riskier. WACC declines with leverage (due to the tax shield) even as k_e rises, until financial distress costs begin to dominate.",
+          "The cost of equity increases with leverage: $k_e = k_0 + (k_0 - k_d)(1-t)\\frac{D}{E}$. As debt increases, equity becomes riskier. WACC declines with leverage (due to the tax shield) even as $k_e$ rises, until financial distress costs begin to dominate.",
       },
       {
         term: "Trade-Off Theory",
@@ -1237,7 +1237,7 @@ export const QUESTION_BANK = {
       {
         term: "WACC (Weighted Average Cost of Capital)",
         definition:
-          "WACC = (E/V)k_e + (D/V)k_d(1−t), using market value weights. Represents the blended after-tax cost of all capital sources; used as the discount rate for firm-level (FCFF) valuation. Minimized at the optimal capital structure where marginal tax shield benefit equals marginal distress cost.",
+          "$\\text{WACC} = \\frac{E}{V}k_e + \\frac{D}{V}k_d(1-t)$, using market value weights. Represents the blended after-tax cost of all capital sources; used as the discount rate for firm-level (FCFF) valuation. Minimized at the optimal capital structure where marginal tax shield benefit equals marginal distress cost.",
       },
     ],
   },
@@ -1439,22 +1439,22 @@ export const QUESTION_BANK = {
       {
         term: "Gordon Growth Model (GGM)",
         definition:
-          "A single-stage DDM for a firm with constant perpetual growth: V = D₁ / (r − g). Requires r > g. Used for stable, mature firms. Also yields justified multiples: P/E = payout / (r − g); P/B = (ROE − g) / (r − g). Value is highly sensitive to small changes in r − g.",
+          "A single-stage DDM for a firm with constant perpetual growth: $V = \\frac{D_1}{r - g}$. Requires $r > g$. Also yields justified multiples: $P/E = \\frac{\\text{payout}}{r-g}$; $P/B = \\frac{ROE-g}{r-g}$. Value is highly sensitive to small changes in $r - g$.",
       },
       {
         term: "H-Model",
         definition:
-          "A two-stage DDM approximation where the growth rate declines linearly from a high short-term rate (g_S) to a stable long-run rate (g_L) over 2H years. V = [D₀(1+g_L) + D₀·H·(g_S−g_L)] / (r−g_L). Simpler than a full multi-period model but an approximation.",
+          "A two-stage DDM approximation where the growth rate declines linearly from a high short-term rate ($g_S$) to a stable long-run rate ($g_L$) over $2H$ years. $$V = \\frac{D_0(1+g_L) + D_0 \\cdot H \\cdot (g_S - g_L)}{r - g_L}$$ Simpler than a full multi-period model but an approximation.",
       },
       {
         term: "FCFE (Free Cash Flow to Equity)",
         definition:
-          "Cash flow available to common equity holders: FCFE = Net income + Depreciation − CapEx − ΔWorking Capital + Net borrowing. Alternatively: FCFE = FCFF − Interest(1−t) + Net borrowing. Discounted at the cost of equity (r_e) to estimate intrinsic equity value.",
+          "Cash flow available to common equity holders: $\\text{FCFE} = \\text{Net Income} + \\text{Dep} - \\text{CapEx} - \\Delta\\text{WC} + \\text{Net Borrowing}$. Alternatively: $\\text{FCFE} = \\text{FCFF} - \\text{Interest}(1-t) + \\text{Net Borrowing}$. Discounted at the cost of equity ($r_e$) to estimate intrinsic equity value.",
       },
       {
         term: "FCFF (Free Cash Flow to the Firm)",
         definition:
-          "Cash flow available to all capital providers: FCFF = EBIT(1−t) + Depreciation − CapEx − ΔWorking Capital. Alternatively: FCFF = Net income + Interest(1−t) + Depreciation − CapEx − ΔWorking Capital. Discounted at WACC to estimate total firm value.",
+          "Cash flow available to all capital providers: $\\text{FCFF} = \\text{EBIT}(1-t) + \\text{Dep} - \\text{CapEx} - \\Delta\\text{WC}$. Alternatively: $\\text{FCFF} = \\text{Net Income} + \\text{Interest}(1-t) + \\text{Dep} - \\text{CapEx} - \\Delta\\text{WC}$. Discounted at WACC to estimate total firm value.",
       },
       {
         term: "EV/EBITDA Multiple",
@@ -1464,12 +1464,12 @@ export const QUESTION_BANK = {
       {
         term: "Residual Income (RI) Model",
         definition:
-          "Intrinsic value = Book value + PV of future residual incomes. RI_t = EPS_t − (r_e × BV_{t-1}) = (ROE − r_e) × BV_{t-1}. Useful when dividends are zero or FCF is negative. If ROE > r_e, P/B > 1. Relies heavily on accounting quality.",
+          "Intrinsic value = Book value + PV of future residual incomes. $RI_t = EPS_t - r_e \\times BV_{t-1} = (ROE - r_e) \\times BV_{t-1}$. Useful when dividends are zero or FCF is negative. If $ROE > r_e$, $P/B > 1$. Relies heavily on accounting quality.",
       },
       {
         term: "Justified P/B and P/E Ratios",
         definition:
-          "Justified P/B = (ROE − g) / (r − g); equals 1.0 when ROE = r. Justified leading P/E = payout ratio / (r − g). These fundamental multiples link valuation to underlying return and growth drivers, allowing comparison of a market multiple to its intrinsically justified level.",
+          "Justified $P/B = \\frac{ROE - g}{r - g}$; equals 1.0 when $ROE = r$. Justified leading $P/E = \\frac{\\text{payout}}{r - g}$. These fundamental multiples link valuation to underlying return and growth drivers, allowing comparison of a market multiple to its intrinsically justified level.",
       },
       {
         term: "Control Premium and DLOM",
@@ -1690,12 +1690,12 @@ export const QUESTION_BANK = {
       {
         term: "Modified Duration vs. Effective Duration",
         definition:
-          "Modified duration approximates price sensitivity for option-free bonds assuming fixed cash flows: ModDur = MacDur / (1 + y). Effective duration is calculated from an interest rate model repricing the bond under rate scenarios, capturing how embedded options alter cash flows. Always use effective duration for callable/putable bonds.",
+          "Modified duration approximates price sensitivity for option-free bonds assuming fixed cash flows: $\\text{ModDur} = \\frac{\\text{MacDur}}{1+y}$. Effective duration is calculated from an interest rate model repricing the bond under rate scenarios, capturing how embedded options alter cash flows. Always use effective duration for callable/putable bonds.",
       },
       {
         term: "Convexity",
         definition:
-          "The second-order measure of price sensitivity; captures the curvature of the price-yield relationship. Full price change ≈ −ModDur × Δy + ½ × Convexity × (Δy)². Positive convexity benefits investors (gains > losses for equal rate moves). Callable bonds exhibit negative convexity near the call price.",
+          "The second-order measure of price sensitivity; captures the curvature of the price-yield relationship. $\\frac{\\Delta P}{P} \\approx -\\text{ModDur} \\cdot \\Delta y + \\frac{1}{2} \\cdot \\text{Convexity} \\cdot (\\Delta y)^2$. Positive convexity benefits investors (gains > losses for equal rate moves). Callable bonds exhibit negative convexity near the call price.",
       },
       {
         term: "Z-Spread (Zero-Volatility Spread)",
@@ -1937,7 +1937,7 @@ export const QUESTION_BANK = {
       {
         term: "Put-Call Parity",
         definition:
-          "For European options on a non-dividend-paying stock: C + K·e^(−rT) = P + S, or equivalently C − P = S − K·e^(−rT). Establishes arbitrage-free relationship between calls, puts, the underlying, and the risk-free bond. Violations create risk-free arbitrage opportunities.",
+          "For European options on a non-dividend-paying stock: $C + Ke^{-rT} = P + S$, or equivalently $C - P = S - Ke^{-rT}$. Establishes arbitrage-free relationship between calls, puts, the underlying, and the risk-free bond. Violations create risk-free arbitrage opportunities.",
       },
       {
         term: "Delta (Δ)",
@@ -1962,7 +1962,7 @@ export const QUESTION_BANK = {
       {
         term: "Forward Pricing (Cost-of-Carry Model)",
         definition:
-          "Fair forward price: F = (S + PV(storage costs) − PV(convenience yield)) × e^(rT). For financial assets with no dividends: F = S × e^(rT). For dividend-paying stocks: F = (S − PV(dividends)) × e^(rT). Convenience yield reflects non-monetary benefits of holding the physical commodity.",
+          "Fair forward price: $F = (S + PV(\\text{storage}) - PV(\\text{conv. yield})) \\cdot e^{rT}$. No dividends: $F = S \\cdot e^{rT}$. Dividend-paying: $F = (S - PV(\\text{div})) \\cdot e^{rT}$. Convenience yield reflects non-monetary benefits of holding the physical commodity.",
       },
       {
         term: "Futures vs. Forwards",
@@ -2430,12 +2430,12 @@ export const QUESTION_BANK = {
       {
         term: "Fama-French Three-Factor Model",
         definition:
-          "Extends CAPM with two additional factors: SMB (Small Minus Big: small-cap minus large-cap return) and HML (High Minus Low: value minus growth return). R_p − R_f = α + β_MKT(R_m−R_f) + β_SMB(SMB) + β_HML(HML). Explains most of the cross-section of equity returns better than CAPM alone.",
+          "Extends CAPM with two additional factors: SMB (Small Minus Big) and HML (High Minus Low: value minus growth). $R_p - R_f = \\alpha + \\beta_{MKT}(R_m - R_f) + \\beta_{SMB}(\\text{SMB}) + \\beta_{HML}(\\text{HML})$. Explains most of the cross-section of equity returns better than CAPM alone.",
       },
       {
         term: "Information Ratio (IR)",
         definition:
-          "IR = Active return / Tracking error. Measures active management efficiency: excess return per unit of active risk taken relative to benchmark. IR > 0.5 is considered good; > 1.0 is exceptional. Fundamental law: IR ≈ IC × √BR (IC = forecast skill, BR = number of independent bets).",
+          "$IR = \\frac{\\text{Active Return}}{\\text{Tracking Error}}$. Measures active management efficiency: excess return per unit of active risk taken relative to benchmark. $IR > 0.5$ is considered good; $> 1.0$ is exceptional. Fundamental law: $IR \\approx IC \\times \\sqrt{BR}$ (IC = forecast skill, BR = number of independent bets).",
       },
       {
         term: "Tracking Error",
@@ -2450,7 +2450,7 @@ export const QUESTION_BANK = {
       {
         term: "CVaR (Conditional VaR / Expected Shortfall)",
         definition:
-          "The expected loss given that the loss exceeds the VaR threshold. CVaR = E[Loss | Loss > VaR]. Always ≥ VaR; quantifies tail risk magnitude, not just the threshold. A coherent risk measure (unlike VaR), satisfying subadditivity—diversified portfolios have lower CVaR than the sum of individual CVaRs.",
+          "The expected loss given that the loss exceeds the VaR threshold. $CVaR = E[\\text{Loss} \\mid \\text{Loss} > VaR]$. Always $\\geq$ VaR; quantifies tail risk magnitude, not just the threshold. A coherent risk measure (unlike VaR), satisfying subadditivity—diversified portfolios have lower CVaR than the sum of individual CVaRs.",
       },
       {
         term: "Liability-Driven Investing (LDI)",
@@ -2465,7 +2465,7 @@ export const QUESTION_BANK = {
       {
         term: "Fundamental Law of Active Management",
         definition:
-          "IR ≈ IC × √BR (Grinold's law). IC (Information Coefficient) = correlation between manager's forecasts and actual outcomes, measuring skill. BR (Breadth) = number of independent active decisions per year. Implies managers should diversify their bets and apply skill consistently across a wide opportunity set to maximize risk-adjusted active return.",
+          "$IR \\approx IC \\times \\sqrt{BR}$ (Grinold's law). IC (Information Coefficient) = correlation between manager's forecasts and actual outcomes, measuring skill. BR (Breadth) = number of independent active decisions per year. Implies managers should diversify their bets and apply skill consistently across a wide opportunity set to maximize risk-adjusted active return.",
       },
     ],
   },

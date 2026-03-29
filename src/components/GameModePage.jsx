@@ -814,6 +814,18 @@ function FlashcardMatch({ scope, onHome }) {
   const [flipped, setFlipped] = useState(false)
   const [results, setResults] = useState([])           // 'known' | 'unknown' per card
   const [phase,   setPhase]   = useState('playing')    // 'playing' | 'done'
+  const backFaceRef = useRef(null)
+
+  useEffect(() => {
+    if (flipped && backFaceRef.current && window.renderMathInElement) {
+      window.renderMathInElement(backFaceRef.current, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$',  right: '$',  display: false },
+        ],
+      })
+    }
+  }, [flipped, index])
 
   const current   = cards[index]
   const knownCount   = results.filter(r => r === 'known').length
@@ -1061,6 +1073,7 @@ function FlashcardMatch({ scope, onHome }) {
 
           {/* ── BACK FACE ── */}
           <div
+            ref={backFaceRef}
             className="absolute inset-0 rounded-2xl border bg-white flex flex-col"
             style={{
               backfaceVisibility: 'hidden',
