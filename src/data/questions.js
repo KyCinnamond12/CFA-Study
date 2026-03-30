@@ -2116,240 +2116,235 @@ export const QUESTION_BANK = {
     vignettes: [
       {
         id: "alts-v1",
-        title: "Private Equity Valuation and Fund Performance",
+        title: "Commodity Futures and Roll Return Analysis",
         caseText:
-          "Meridian Capital is a private equity fund that invested $80M in a portfolio company at a post-money valuation of $200M (Series B). Three years later, the company completes a Series C at a $500M pre-money valuation. The fund's carried interest is 20% above an 8% preferred return hurdle. Total contributions were $150M and total distributions were $90M over the fund's life to date. A venture capital analyst separately values an early-stage startup using the VC method: expected exit value of $120M in 5 years, required return of 40%, 2M shares currently outstanding, and a post-money valuation target of $15M.",
+          "Sarah Chen is a commodity analyst evaluating crude oil futures positions. The near contract is priced at $85/bbl and the next contract is priced at $82/bbl. The spot price is $88/bbl. Storage costs are high and current inventory levels are low. She is also evaluating which theory of futures returns best explains the current market structure.",
         questions: [
           {
-            text: "Meridian's ownership percentage after the Series B investment, and the implied value of Meridian's stake at the Series C pre-money valuation, are closest to:",
+            text: "Based on the relationship between spot and futures prices, the crude oil market is best described as being in:",
             options: [
-              "40% ownership; implied stake value $200M",
-              "40% ownership; implied stake value $160M",
-              "40% ownership; implied stake value $120M",
-              "50% ownership; implied stake value $250M",
-            ],
-            correctAnswer: 0,
-            explanation:
-              "Meridian invested $80M at a $200M post-money valuation: ownership = $80M / $200M = 40%. At Series C pre-money of $500M, Meridian's stake = 40% × $500M = $200M (assuming no dilution). Answer: 40% ownership, $200M implied value.",
-          },
-          {
-            text: "The fund's MOIC (multiple on invested capital) to date is closest to:",
-            options: ["0.60×", "1.60×", "2.00×", "2.60×"],
-            correctAnswer: 0,
-            explanation:
-              "MOIC = Total value (distributions + residual NAV) / total contributions. To date: distributions = $90M, contributions = $150M. MOIC on distributions only = $90M / $150M = 0.60×. If the question asks for distributions-only MOIC (DPI), it is 0.60×. Total value including unrealized would be higher, but with only the given data, DPI = 0.60×.",
-          },
-          {
-            text: "Using the venture capital method, the pre-money valuation of the startup today is closest to:",
-            options: ["$6.57M", "$8.57M", "$10.57M", "$12.57M"],
-            correctAnswer: 0,
-            explanation:
-              "VC method: Post-money value today = Exit value / (1 + r)^t = $120M / (1.40)^5 = $120M / 5.378 = $22.31M. Pre-money valuation = Post-money − investment. First find required investment: target post-money = $15M, so investment = $15M − pre-money. Actually: pre-money = post-money − new investment = $22.31M − $15M = $7.31M ≈ $8.57M. Minor rounding: $120M/1.40^5 = $120M/5.3782 = $22.31M; pre-money = $22.31M − $15M = $7.31M. Closest is $8.57M.",
-          },
-          {
-            text: "Carried interest in private equity is best described as:",
-            options: [
-              "An annual management fee paid regardless of fund performance",
-              "The GP's share of profits above the preferred return hurdle, aligning GP and LP incentives",
-              "A fee charged to portfolio companies for deal origination services",
-              "Interest earned by LPs on committed but uncalled capital",
+              "Contango, because futures prices exceed spot price",
+              "Backwardation, because spot price exceeds futures prices",
+              "Contango, because storage costs are high",
+              "Equilibrium, because the basis is within normal range",
             ],
             correctAnswer: 1,
             explanation:
-              "Carried interest (carry) is the performance fee—typically 20%—of profits above the hurdle rate (preferred return) paid to the general partner. It aligns GP incentives with LP outcomes by making the GP's primary compensation contingent on generating returns above the hurdle, typically 8%. Carry is only earned after LPs receive their invested capital plus preferred return.",
+              "Backwardation occurs when spot price > futures price. Here spot ($88) > near contract ($85) > next contract ($82). The downward sloping futures curve confirms backwardation. Low inventory and high convenience yield are the causes per your notes.",
+          },
+          {
+            text: "The roll return for a long futures position rolling from the near to the next contract is closest to:",
+            options: ["-3.53%", "+3.53%", "-2.35%", "+4.71%"],
+            correctAnswer: 1,
+            explanation:
+              "Roll Return = (Fnear,end - Fnext,end) / Fnear,end = ($85 - $82) / $85 = +3.53%. In backwardation, rolling from a higher-priced near contract to a lower-priced next contract generates positive roll return — a key exam point from your notes.",
+          },
+          {
+            text: "An analyst argues the backwardation is best explained by low inventory levels driving up the convenience yield. This explanation is most consistent with:",
+            options: [
+              "Insurance Theory",
+              "Hedging Pressure Hypothesis",
+              "Theory of Storage",
+              "Arbitrage Pricing Theory",
+            ],
+            correctAnswer: 2,
+            explanation:
+              "Per your notes exam tip: Inventory levels / Convenience yield / Storage cost questions = Theory of Storage. The Theory of Storage holds that low inventory raises convenience yield, creating backwardation. High inventory lowers convenience yield, creating contango.",
+          },
+          {
+            text: "If crude oil shifts from backwardation to contango, a long futures investor will experience:",
+            options: [
+              "Positive roll return because futures prices rise toward spot",
+              "Negative roll return because the investor rolls into higher-priced contracts",
+              "No change in roll return because total return is unaffected by curve shape",
+              "Positive roll return because contango indicates rising spot prices",
+            ],
+            correctAnswer: 1,
+            explanation:
+              "In contango, futures prices > spot. Rolling from a lower-priced near contract into a higher-priced next contract means buying high and selling low — generating negative roll return. Your notes specifically state: Contango induces NEGATIVE roll return.",
           },
         ],
       },
       {
         id: "alts-v2",
-        title: "Real Estate Valuation: Income and Cost Approaches",
+        title: "REIT Valuation and Real Estate Market Cycle",
         caseText:
-          "An analyst values a Class A office building using the income approach. Potential gross income (PGI) is $4.2M, vacancy and collection loss is 8%, operating expenses are $1.1M, and capital reserves are $150K. Comparable properties in the submarket trade at a cap rate of 6.5%. The analyst also applies the cost approach: replacement cost of improvements is $18M, accrued depreciation is $3.2M, and land value is $5M.",
+          "Marcus Reid is analyzing Apex REIT, an equity REIT trading at $42/share. Net income is $2.10/share, depreciation is $1.80/share, gains on property sales are $0.40/share, noncash rents are $0.15/share, and recurring maintenance capex is $0.25/share. The estimated NAV per share is $38.00. The property portfolio generates NOI of $180M and the market cap rate is 6.0%.",
         questions: [
           {
-            text: "The property's net operating income (NOI) and income approach value are closest to:",
+            text: "Apex REIT's FFO per share is closest to:",
+            options: ["$2.10", "$3.10", "$3.50", "$4.90"],
+            correctAnswer: 2,
+            explanation:
+              "FFO = NI + Depreciation & Amortization - Gains on property sales = $2.10 + $1.80 - $0.40 = $3.50 per share. Per your notes: depreciation understates real estate value so it is added back. Gains on property sales are non-recurring so they are subtracted.",
+          },
+          {
+            text: "Apex REIT's AFFO per share is closest to:",
+            options: ["$2.10", "$3.10", "$3.50", "$4.90"],
+            correctAnswer: 1,
+            explanation:
+              "AFFO = FFO - Noncash rents - Recurring Maintenance Capex = $3.50 - $0.15 - $0.25 = $3.10. Per your notes: AFFO is the true cash flow measure. Noncash rent = difference between reported rent and cash rent and must be deducted.",
+          },
+          {
+            text: "Based on the NAV approach, Apex REIT's shares are most likely:",
             options: [
-              "NOI = $2.714M; Value = $41.8M",
-              "NOI = $2.564M; Value = $39.4M",
-              "NOI = $2.414M; Value = $37.1M",
-              "NOI = $2.864M; Value = $44.1M",
+              "Undervalued — price below NAV suggests a buying opportunity",
+              "Fairly valued — small premium to NAV is within normal range",
+              "Overvalued — price above NAV of $38 suggests premium to intrinsic value",
+              "Cannot be determined without knowing the cap rate",
             ],
-            correctAnswer: 0,
+            correctAnswer: 2,
             explanation:
-              "Effective gross income (EGI) = PGI × (1 − vacancy) = $4.2M × 0.92 = $3.864M. NOI = EGI − Operating expenses = $3.864M − $1.1M = $2.764M. Note: capital reserves are excluded from NOI in the direct capitalization method (NOI is before capex reserves). NOI ≈ $2.764M; Value = NOI / cap rate = $2.764M / 0.065 = $42.5M. Closest: $2.714M / 6.5% = $41.8M (minor rounding on vacancy treatment).",
+              "Price ($42) > NAV ($38) = premium, suggesting overvaluation per your notes. Price > NAV = Premium/overvalued. However your notes also note this could be explained by other factors such as management quality or growth prospects. The NAV approach is asset-based and most reliable when property transactions are available.",
           },
           {
-            text: "The cost approach value of the property is closest to:",
-            options: ["$19.8M", "$21.0M", "$23.0M", "$26.2M"],
-            correctAnswer: 0,
-            explanation:
-              "Cost approach: Value = Land value + (Replacement cost − Accrued depreciation) = $5.0M + ($18.0M − $3.2M) = $5.0M + $14.8M = $19.8M. The cost approach is most useful for unique properties or new construction with limited comparable sales. For income-producing properties, the income approach typically dominates.",
-          },
-          {
-            text: "If market cap rates compress from 6.5% to 5.8% (driven by increased investor demand), the income approach value will:",
+            text: "If the market cap rate compresses from 6.0% to 5.0%, the estimated property portfolio value will:",
             options: [
-              "Decrease because lower cap rates signal lower NOI growth",
-              "Increase because property value is inversely related to the cap rate",
-              "Remain unchanged because NOI determines value, not the cap rate",
-              "Decrease because cap rate compression indicates rising vacancy rates",
+              "Decrease from $3,000M to $2,500M",
+              "Increase from $3,000M to $3,600M",
+              "Remain unchanged because NOI determines value",
+              "Decrease because lower cap rates signal lower growth",
             ],
             correctAnswer: 1,
             explanation:
-              "Value = NOI / cap rate. A lower cap rate, holding NOI constant, directly increases value. At 5.8%: $2.764M / 0.058 = $47.7M vs. $42.5M at 6.5%. Cap rate compression reflects increased investor demand/lower required return, bidding up property prices. It is analogous to multiple expansion in equity markets.",
-          },
-          {
-            text: "The capitalization rate in real estate is most analogous to which equity valuation concept?",
-            options: [
-              "The price-to-earnings ratio, where a lower cap rate implies a higher valuation multiple",
-              "The earnings yield (E/P), where the cap rate is the required return on the income stream",
-              "The dividend payout ratio, linking income to total returns",
-              "The PEG ratio, adjusting NOI growth relative to the cap rate",
-            ],
-            correctAnswer: 1,
-            explanation:
-              "The cap rate (NOI / Value) is directly analogous to the earnings yield (EPS / Price = 1/P/E). A lower cap rate implies a higher valuation multiple (like a lower earnings yield implies a higher P/E). Cap rate ≈ required return − NOI growth rate, mirroring the Gordon Growth Model relationship r − g.",
+              "Property Value = NOI / Cap Rate. At 6.0%: $180M / 0.06 = $3,000M. At 5.0%: $180M / 0.05 = $3,600M. Per your notes: Cap Rate = required return - growth. Higher cap rate = lower value, lower cap rate = higher value. Cap rate compression increases property values.",
           },
         ],
       },
     ],
     suddenDeath: [
       {
-        text: "A private equity fund reports a TVPI of 1.8× and a DPI of 0.6×. This most likely indicates:",
+        text: "In a commodity futures market in backwardation, rolling a long futures position from the near contract to the next contract generates:",
         options: [
-          "The fund has returned 1.8× invested capital in cash distributions",
-          "60% of value has been realized in cash and 120% remains as unrealized NAV",
-          "The fund has underperformed because DPI is below 1.0×",
-          "TVPI and DPI are inconsistent and suggest a reporting error",
+          "Negative roll return because futures prices exceed spot",
+          "Positive roll return because the investor sells high and buys low",
+          "Zero roll return because roll return only applies to contango markets",
+          "Negative roll return because storage costs reduce the roll yield",
         ],
         correctAnswer: 1,
         explanation:
-          "TVPI (Total Value to Paid-In) = DPI + RVPI. TVPI of 1.8× means total value (distributions + residual NAV) is 1.8× invested capital. DPI (Distributions to Paid-In) of 0.6× means 60% has been returned in cash. Therefore RVPI (Residual Value to Paid-In) = 1.8 − 0.6 = 1.2×, meaning 120% of invested capital remains as unrealized portfolio value.",
+          "In backwardation, near contract price > next contract price. Rolling means selling the near (higher price) and buying the next (lower price) — selling high, buying low = positive roll return. Your notes: Backwardation induces POSITIVE roll return.",
       },
       {
-        text: "The IRR and MOIC of a private equity investment can give conflicting performance signals because:",
+        text: "A commodity analyst notes high storage costs, low convenience yield, and excess supply. The market is most likely in:",
         options: [
-          "IRR is always higher than MOIC for investments held longer than one year",
-          "IRR is time-weighted and rewards quick returns, while MOIC rewards total capital growth regardless of timing",
-          "MOIC adjusts for the risk-free rate while IRR does not",
-          "IRR is calculated on committed capital while MOIC uses invested capital",
+          "Backwardation with positive roll return",
+          "Contango with negative roll return",
+          "Backwardation with negative roll return",
+          "Contango with positive roll return",
         ],
         correctAnswer: 1,
         explanation:
-          "IRR is sensitive to the timing and pace of capital deployment and return. A deal returning 2× in 2 years has a high IRR but the same MOIC as one returning 2× in 5 years (which has a much lower IRR). Conversely, a deal with a very high MOIC over a long period can have a modest IRR. Both metrics together provide a fuller picture.",
+          "Per your notes: Contango causes = high storage costs, low convenience yield, excess supply. Contango = futures > spot = upward sloping curve = NEGATIVE roll return for long holders.",
       },
       {
-        text: "In the venture capital method, the target ownership percentage for a new investor is determined by:",
+        text: "An oil producer sells futures contracts to lock in a price for future production. Under the Insurance Theory of futures returns, this activity most likely results in:",
         options: [
-          "The investor's required return applied to the expected exit value, divided by the post-money valuation",
-          "The pre-money valuation divided by the total amount of capital raised to date",
-          "The expected IRR divided by the fund's hurdle rate",
-          "The post-money valuation divided by the exit value at the required return",
-        ],
-        correctAnswer: 0,
-        explanation:
-          "VC method: Required investment = Exit value / (1 + r)^n = post-money value today. Target ownership % = Investment / Post-money valuation. Alternatively: ownership % = Required investment / (Required investment + pre-money value). The investor's ownership is set so that the exit proceeds, after dilution by future rounds, yield the required return.",
-      },
-      {
-        text: "A hedge fund employs a global macro strategy. Compared to a long/short equity fund, global macro funds typically have:",
-        options: [
-          "Lower volatility because they hold diversified equity baskets",
-          "More concentrated positions across asset classes including currencies, rates, and commodities",
-          "Higher correlation to equity markets due to long equity bias",
-          "Lower leverage because derivatives are prohibited in the strategy",
+          "Contango because producers dominate the long side of futures markets",
+          "Backwardation because producers supply risk premium to attract speculator long positions",
+          "Contango because high storage costs offset the producer hedging pressure",
+          "No curve shape effect because arbitrageurs immediately eliminate any mispricing",
         ],
         correctAnswer: 1,
         explanation:
-          "Global macro funds take concentrated directional bets across multiple asset classes (equities, fixed income, currencies, commodities) based on macroeconomic themes, typically using significant leverage through derivatives. They have lower correlation to equity markets than long/short equity funds, which maintain an equity beta.",
+          "Per your notes: Insurance Theory = producers hedge by selling futures, speculators demand risk premium, backwardation is likely. The exam tip: Producer hedging risk = Insurance Theory.",
       },
       {
-        text: "The roll yield on a commodity futures position is positive (contango) or negative (backwardation)—specifically, a futures market in backwardation generates positive roll yield because:",
+        text: "A REIT must distribute at least what percentage of its taxable income to qualify for pass-through tax treatment?",
+        options: ["75%", "80%", "90%", "100%"],
+        correctAnswer: 2,
+        explanation:
+          "Per your notes REIT requirements: ≥90% of income must be distributed to shareholders. This is what allows REITs to avoid corporate-level tax — income is passed through to investors who pay tax at their individual rates.",
+      },
+      {
+        text: "Apex REIT has internal management while Beta REIT uses external management. Which statement is most accurate per CFA curriculum?",
         options: [
-          "The spot price is below the futures price, so rolling to the next contract locks in a gain",
-          "Futures prices are below spot prices; as futures approach expiration they rise toward spot, generating a gain for long holders",
-          "Backwardation indicates rising demand, increasing the spot price over the holding period",
-          "The convenience yield exceeds the risk-free rate, creating a positive carry for long positions",
+          "External management is preferred because third-party managers have more expertise",
+          "Internal management is preferred because of better alignment between managers and shareholders",
+          "Both structures have identical agency costs when fee structures are properly disclosed",
+          "External management is preferred because it reduces fixed overhead costs for the REIT",
         ],
         correctAnswer: 1,
         explanation:
-          "In backwardation, futures prices are below the expected future spot price. As the futures contract ages and converges toward spot, prices rise—generating a positive roll yield for long futures holders. In contango (futures above spot), the futures price must fall toward spot at expiration, creating negative roll yield for longs.",
+          "Per your notes: Internal management = management employed by REIT, better alignment, preferred. External management = third-party, fee conflicts possible, worse alignment. Internal management is generally preferred from a governance standpoint.",
       },
       {
-        text: "The NAV per share of a hedge fund at month-end is calculated as:",
+        text: "AFFO differs from FFO in that AFFO additionally subtracts:",
         options: [
-          "Total gross assets divided by shares outstanding, before deducting liabilities",
-          "Total assets minus total liabilities, divided by shares outstanding",
-          "Total capital contributions minus management fees, divided by shares",
-          "Gross asset value minus the high-water mark deficit, divided by shares",
+          "Depreciation and amortization",
+          "Gains on property sales",
+          "Noncash rents and recurring maintenance capex",
+          "Interest expense and income taxes",
         ],
-        correctAnswer: 1,
+        correctAnswer: 2,
         explanation:
-          "NAV per share = (Total assets − Total liabilities) / Shares outstanding. For hedge funds, this includes marking all positions to market, accruing management fees and incentive fees, and netting against any liabilities. The high-water mark affects whether an incentive fee is accrued but is not subtracted directly from NAV.",
+          "Per your notes: AFFO = FFO - Noncash rents - Recurring Maintenance Capex. AFFO is the true cash flow measure. Noncash rent = difference between reported rent and actual cash rent received. FFO already adds back depreciation and subtracts gains.",
       },
       {
-        text: "A real estate private equity fund using leverage to acquire properties will most likely report a higher:",
+        text: "A hedge fund strategy that performs BEST during market crises and uses systematic trend-following with futures is:",
         options: [
-          "Cap rate because leverage reduces the equity required per property",
-          "Equity IRR compared to the unlevered (property-level) IRR, assuming the property return exceeds the cost of debt",
-          "NOI because interest expense reduces operating cost",
-          "TVPI because leverage reduces the total capital invested",
+          "Equity Market Neutral",
+          "Global Macro",
+          "Managed Futures",
+          "Fixed Income Arbitrage",
         ],
-        correctAnswer: 1,
+        correctAnswer: 2,
         explanation:
-          "Financial leverage amplifies equity returns when the property return (cap rate or unlevered IRR) exceeds the cost of debt. The equity IRR > property-level IRR because less equity is invested for the same NOI and appreciation. This leverage effect is the primary reason private real estate funds use debt financing.",
+          "Per your notes: Managed Futures = systematic trend-following using futures, BEST in crises. Liquidity: Very High. Your notes specifically capitalize BEST in crises for this strategy. It provides diversification benefits and profits from strong price trends that occur during market dislocations.",
       },
       {
-        text: "Which feature of a hedge fund limited partnership agreement most directly protects investors from paying performance fees on recovered losses?",
+        text: "An equity market neutral hedge fund maintains equal long and short positions. Its expected beta is closest to:",
         options: [
-          "The management fee offset provision",
-          "The high-water mark provision",
-          "The lock-up period restriction",
-          "The clawback provision for general partners",
+          "+1.0 reflecting full market exposure",
+          "+0.5 reflecting partial market exposure",
+          "0 reflecting no net market exposure",
+          "-1.0 reflecting inverse market exposure",
         ],
-        correctAnswer: 1,
+        correctAnswer: 2,
         explanation:
-          "The high-water mark ensures the fund's NAV must exceed its previous peak before the manager can charge a performance fee. If the fund loses value, no incentive fee is charged until losses are recovered. This prevents investors from paying performance fees twice on the same gains after a drawdown.",
+          "Per your notes: Equity Market Neutral exposure = Neutral (beta ≈ 0). By holding equal dollar amounts long and short, market exposure cancels out. Returns come from pure alpha — stock mispricing — rather than market direction. Low volatility, steady returns.",
       },
     ],
     flashcards: [
       {
-        term: "MOIC, DPI, RVPI, TVPI",
+        term: "Contango vs Backwardation",
         definition:
-          "Private equity performance multiples:\n• MOIC (Multiple on Invested Capital) = total value / invested capital\n• DPI (Distributions to Paid-In) = cash returned / paid-in capital (realized)\n• RVPI (Residual Value to Paid-In) = NAV / paid-in capital (unrealized)\n• TVPI = DPI + RVPI (total)\nIRR measures time-weighted return; MOIC measures total capital growth.",
+          "Contango: Futures Price > Spot Price, upward sloping curve. Causes: high storage costs, low convenience yield, excess supply. Induces NEGATIVE roll return.\n\nBackwardation: Spot Price > Futures Price, downward sloping curve. Causes: low inventory, high demand, high convenience yield. Induces POSITIVE roll return.",
       },
       {
-        term: "Venture Capital Method",
+        term: "Total Commodity Futures Return",
         definition:
-          "Startup valuation approach:\n• Estimate exit value at a terminal year\n• Discount to present at the required return: Post-money value = Exit value / (1+r)^n\n• Pre-money value = Post-money − new investment\n• Investor ownership % = Investment / Post-money\nAccounts for high failure rates through a high required return (often 30–60%).",
+          "Total Return = Price Return + Roll Return + Collateral Return\n\n• Price Return = (Fnear,end - Fnear,start) / Fnear,start\n• Roll Return = (Fnear,end - Fnext,end) / Fnear,end\n• Collateral Return = risk-free rate × time",
       },
       {
-        term: "Carried Interest (Carry)",
+        term: "Three Theories of Futures Returns",
         definition:
-          "The GP's performance allocation—typically 20% of profits above the preferred return hurdle (commonly 8%). Aligns GP incentives with LP outcomes. Most fund structures return LP capital and the preferred return first; carry is then split 80/20 (LP/GP). Some structures include a GP catch-up provision.",
+          "1. Insurance Theory: producers hedge by selling futures → speculators demand premium → backwardation likely\n2. Hedging Pressure: curve shape depends on dominant hedgers. Producers hedge more = backwardation. Consumers hedge more = contango\n3. Theory of Storage: based on inventory. Low inventory → high CY → backwardation. High inventory → low CY → contango",
       },
       {
-        term: "Capitalization Rate (Cap Rate)",
+        term: "REIT Requirements",
         definition:
-          "Cap rate = NOI / Property value. Used in direct capitalization to value income-producing real estate: Value = NOI / cap rate. Inversely related to value—lower cap rates mean higher valuations. Cap rate ≈ required return − NOI growth rate. Driven by market risk appetite, interest rates, and property-specific risk.",
+          "• ≥75% of assets must be real estate\n• ≥75% of income from rents/mortgage interest\n• ≥90% of income must be distributed\n• No corporate tax (pass-through entity)\n• Equity REITs: own properties (rent + appreciation)\n• Mortgage REITs: own loans/MBS (interest income)",
       },
       {
-        term: "Net Operating Income (NOI)",
+        term: "FFO vs AFFO",
         definition:
-          "NOI = Effective Gross Income (PGI − vacancy) − Operating expenses. Excludes financing costs (interest), income taxes, depreciation, and capital expenditures. The primary income measure for real estate valuation. Used in both direct capitalization (NOI / cap rate) and discounted cash flow (DCF) approaches.",
+          "FFO = Net Income + Depreciation & Amortization - Gains on property sales\n(Depreciation understates real estate value so added back)\n\nAFFO = FFO - Noncash rents - Recurring Maintenance Capex\n(True cash flow measure)\n\nP/FFO: easily computed. P/AFFO: better proxy, less standardized.",
       },
       {
-        term: "Roll Yield (Commodity Futures)",
+        term: "Real Estate NOI, Cap Rate & DSCR",
         definition:
-          "Return from rolling a maturing futures contract into the next expiry. Positive roll yield in backwardation (futures < spot): contracts rise toward spot as expiry approaches. Negative roll yield in contango (futures > spot): contracts fall toward spot. A key component of total commodity futures return alongside spot return and collateral yield.",
+          "NOI = EGI - Operating Expenses - Maintenance\nProperty Value = NOI / Cap Rate\nCap Rate = Required Return - Growth (↑Cap Rate = ↓Value)\n\nDSCR = NOI / Debt Service\n>1 = safe, <1 = dangerous\n\nLTV = Debt / Property Value (higher LTV = higher risk)",
       },
       {
-        term: "High-Water Mark",
+        term: "Hedge Fund Strategies — Key Characteristics",
         definition:
-          "A hedge fund provision requiring that NAV must exceed its previous peak before performance fees can be charged. Protects investors from paying incentive fees twice on recovered losses. If a fund falls 20% and then rises 25%, the 5% net gain above the prior peak is the only amount subject to performance fees.",
+          "• Long/Short Equity: Net long, +beta, moderate-high leverage\n• Market Neutral: beta≈0, high leverage, pure alpha\n• Dedicated Short Bias: net short, -beta, volatile\n• Merger Arbitrage: event-driven, buy target/short acquirer\n• Distressed: event-driven, very illiquid, poor in recessions\n• Managed Futures: directional, BEST in crises, very liquid\n• Global Macro: directional, high leverage, flexible",
       },
       {
-        term: "Hedge Fund Strategy Types",
+        term: "Real Estate Market Cycle",
         definition:
-          "• Long/Short Equity: simultaneous long and short equity positions; net long bias typical\n• Global Macro: directional bets across asset classes based on macro themes\n• Event-Driven: merger arbitrage, distressed debt\n• Relative Value: exploits pricing discrepancies (convertible arbitrage, fixed income arbitrage)\n• Managed Futures (CTA): systematic trend-following using futures",
+          "Recovery: NOI↑, DSCR↑, LTV↓, rates begin to rise, risk↓\nExpansion: NOI↑, DSCR↑, LTV↓, rates↑, risk low\nOversupply: NOI↓, DSCR↓, LTV↑, rates peak/falling, risk↑\nRecession: NOI↓, DSCR↓, LTV↑, rates low, risk high\n\nNote: Lower vacancy rate indicates oversupply or recession phase",
       },
     ],
     crossword: [

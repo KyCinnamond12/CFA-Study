@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { GAME_MODES } from '../data/constants'
 import { TopicIcon, ModeIcon, IconBack } from './Icons'
+import CheatSheet from './CheatSheet'
 
 // ─── Mode Card ────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,8 @@ function TopicModeCard({ mode, topic, onClick }) {
 export default function TopicPage({ topic, onBack, onModePlay }) {
   // Limit to the 3 standard topic modes (not crossword on topic page)
   const modes = GAME_MODES.filter(m => m.id !== 'crossword')
+  const [showCheatSheet, setShowCheatSheet] = useState(false)
+  const hasCheatSheet = topic.id === 'alts'
 
   return (
     <div className="min-h-screen" style={{ background: '#faf8f3' }}>
@@ -130,6 +133,48 @@ export default function TopicPage({ topic, onBack, onModePlay }) {
           </div>
         </div>
 
+        {/* ── Cheat Sheet ── */}
+        <div className="mt-8">
+          <div className="flex items-center gap-4 mb-4">
+            <h2 className="font-serif text-xl font-semibold text-[#0f1f3d]">Resources</h2>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+          {hasCheatSheet ? (
+            <button
+              onClick={() => setShowCheatSheet(true)}
+              className="flex items-center gap-3 bg-white border border-[#c8a84b]/40 rounded-xl px-5 py-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c8a84b]"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#fdf6e3' }}>
+                <svg className="w-4 h-4" style={{ color: '#c8a84b' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-[#0f1f3d]">Cheat Sheet</p>
+                <p className="text-[11px] text-slate-400">One-page printable reference</p>
+              </div>
+              <span className="ml-2 text-[10px] tracking-widest px-2 py-0.5 rounded-full font-medium" style={{ background: '#fdf6e3', color: '#c8a84b' }}>
+                NEW
+              </span>
+            </button>
+          ) : (
+            <button
+              disabled
+              className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-5 py-3 opacity-50 cursor-not-allowed"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100">
+                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-slate-400">Cheat Sheet</p>
+                <p className="text-[11px] text-slate-300">Coming Soon</p>
+              </div>
+            </button>
+          )}
+        </div>
+
         {/* ── At-a-glance stats ── */}
         <div className="grid grid-cols-3 gap-4 mt-10">
           {[
@@ -146,6 +191,22 @@ export default function TopicPage({ topic, onBack, onModePlay }) {
         </div>
 
       </main>
+
+      {/* ── Cheat Sheet Modal ── */}
+      {showCheatSheet && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto"
+          style={{ background: 'rgba(15,31,61,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowCheatSheet(false) }}
+        >
+          <div
+            className="relative w-full rounded-2xl shadow-2xl overflow-hidden my-4"
+            style={{ maxWidth: 1100, background: '#faf8f3' }}
+          >
+            <CheatSheet onClose={() => setShowCheatSheet(false)} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
