@@ -47,12 +47,17 @@ function VignetteExam({ scope, onHome }) {
 
   useEffect(() => {
     if (phase !== 'results') return
+    console.log('Starting AI generation')
     setAiStatus('loading')
     const topicLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
     generateNewQuestions(topicLabel, 'vignette')
-      .then(() => setAiStatus('ready'))
+      .then(() => { console.log('AI generation complete'); setAiStatus('ready') })
       .catch(() => setAiStatus('idle'))
   }, [phase])
+
+  useEffect(() => {
+    console.log('AI Status changed to:', aiStatus)
+  }, [aiStatus])
 
   const totalQuestions = vignettes.reduce((s, v) => s + v.questions.length, 0)
   const totalCorrect   = vignettes.reduce((sum, vig, vi) =>
@@ -142,29 +147,6 @@ function VignetteExam({ scope, onHome }) {
           </div>
         </div>
 
-        {/* AI regeneration indicator */}
-        {aiStatus !== 'idle' && (
-          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-3">
-            {aiStatus === 'loading' && (
-              <>
-                <svg className="w-3.5 h-3.5 animate-spin text-[#c8a84b]" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                AI generating new questions...
-              </>
-            )}
-            {aiStatus === 'ready' && (
-              <>
-                <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                New questions ready!
-              </>
-            )}
-          </div>
-        )}
-
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
@@ -181,6 +163,22 @@ function VignetteExam({ scope, onHome }) {
             Back to Home
           </button>
         </div>
+
+        {(aiStatus === 'loading' || aiStatus === 'ready') && (
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            background: '#0f1f3d',
+            color: '#c8a84b',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            zIndex: 9999
+          }}>
+            {aiStatus === 'loading' ? '⏳ Generating new questions...' : '✅ New questions ready!'}
+          </div>
+        )}
       </div>
     )
   }
@@ -495,12 +493,17 @@ function SuddenDeath({ scope, onHome }) {
 
   useEffect(() => {
     if (phase !== 'gameover') return
+    console.log('Starting AI generation')
     setAiStatus('loading')
     const topicLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
     generateNewQuestions(topicLabel, 'suddenDeath')
-      .then(data => { setAiQuestions(data); setAiStatus('ready') })
+      .then(data => { console.log('AI generation complete'); setAiQuestions(data); setAiStatus('ready') })
       .catch(() => setAiStatus('idle'))
   }, [phase])
+
+  useEffect(() => {
+    console.log('AI Status changed to:', aiStatus)
+  }, [aiStatus])
 
   // Clean up any pending timer on unmount
   useEffect(() => () => clearTimeout(timerRef.current), [])
@@ -667,29 +670,6 @@ function SuddenDeath({ scope, onHome }) {
           </div>
         )}
 
-        {/* AI regeneration indicator */}
-        {aiStatus !== 'idle' && (
-          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-3">
-            {aiStatus === 'loading' && (
-              <>
-                <svg className="w-3.5 h-3.5 animate-spin text-[#c8a84b]" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                AI generating new questions...
-              </>
-            )}
-            {aiStatus === 'ready' && (
-              <>
-                <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                New questions ready!
-              </>
-            )}
-          </div>
-        )}
-
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
@@ -706,6 +686,22 @@ function SuddenDeath({ scope, onHome }) {
             Back to Home
           </button>
         </div>
+
+        {(aiStatus === 'loading' || aiStatus === 'ready') && (
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            background: '#0f1f3d',
+            color: '#c8a84b',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            zIndex: 9999
+          }}>
+            {aiStatus === 'loading' ? '⏳ Generating new questions...' : '✅ New questions ready!'}
+          </div>
+        )}
       </div>
     )
   }
@@ -902,12 +898,17 @@ function FlashcardMatch({ scope, onHome }) {
 
   useEffect(() => {
     if (phase !== 'done') return
+    console.log('Starting AI generation')
     setAiStatus('loading')
     const topicLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
     generateNewQuestions(topicLabel, 'flashcard')
-      .then(data => { setAiQuestions(data); setAiStatus('ready') })
+      .then(data => { console.log('AI generation complete'); setAiQuestions(data); setAiStatus('ready') })
       .catch(() => setAiStatus('idle'))
   }, [phase])
+
+  useEffect(() => {
+    console.log('AI Status changed to:', aiStatus)
+  }, [aiStatus])
 
   useEffect(() => {
     if (flipped && backFaceRef.current && window.renderMathInElement) {
@@ -1030,29 +1031,6 @@ function FlashcardMatch({ scope, onHome }) {
           </div>
         )}
 
-        {/* AI regeneration indicator */}
-        {aiStatus !== 'idle' && (
-          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-3">
-            {aiStatus === 'loading' && (
-              <>
-                <svg className="w-3.5 h-3.5 animate-spin text-[#c8a84b]" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                AI generating new questions...
-              </>
-            )}
-            {aiStatus === 'ready' && (
-              <>
-                <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                New questions ready!
-              </>
-            )}
-          </div>
-        )}
-
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
           {unknownCards.length > 0 && (
@@ -1077,6 +1055,22 @@ function FlashcardMatch({ scope, onHome }) {
             Back to Home
           </button>
         </div>
+
+        {(aiStatus === 'loading' || aiStatus === 'ready') && (
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            background: '#0f1f3d',
+            color: '#c8a84b',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            zIndex: 9999
+          }}>
+            {aiStatus === 'loading' ? '⏳ Generating new questions...' : '✅ New questions ready!'}
+          </div>
+        )}
       </div>
     )
   }
