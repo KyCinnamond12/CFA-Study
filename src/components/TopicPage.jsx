@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { GAME_MODES } from '../data/constants'
 import { TopicIcon, ModeIcon, IconBack } from './Icons'
 import CheatSheet from './CheatSheet'
@@ -59,21 +59,82 @@ const TOPIC_PDF = {
   portfolio: 'Portfolio%20Management.pdf',
 }
 
+function base64ToBlobUrl(b64) {
+  const binary = atob(b64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
+}
+
 export default function TopicPage({ topic, onBack, onModePlay }) {
   // Limit to the 3 standard topic modes (not crossword on topic page)
   const modes = GAME_MODES.filter(m => m.id !== 'crossword')
   const [showCheatSheet, setShowCheatSheet] = useState(false)
   const [showNotes, setShowNotes] = useState(false)
-  const [pdfExists, setPdfExists] = useState(null) // null = checking, true, false
+  // notesView: 'loading' | 'viewer' | 'upload'
+  const [notesView, setNotesView] = useState('loading')
+  const [notesUrl, setNotesUrl] = useState(null)
+  const blobUrlRef = useRef(null)
   const hasCheatSheet = topic.id === 'alts'
-  const notesPdf = `/notes/${TOPIC_PDF[topic.id]}`
+  const publicPdf = `/notes/${TOPIC_PDF[topic.id]}`
+  const lsKey = `notes_pdf_${topic.id}`
+
+  // Revoke blob URL on unmount
+  useEffect(() => () => { if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current) }, [])
+
+  function openBlobUrl(b64) {
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
+    const url = base64ToBlobUrl(b64)
+    blobUrlRef.current = url
+    setNotesUrl(url)
+    setNotesView('viewer')
+  }
 
   function openNotes() {
-    setPdfExists(null)
     setShowNotes(true)
-    fetch(notesPdf, { method: 'HEAD' })
-      .then(r => setPdfExists(r.ok))
-      .catch(() => setPdfExists(false))
+    setNotesView('loading')
+
+    // 1. Check localStorage
+    const stored = localStorage.getItem(lsKey)
+    if (stored) {
+      openBlobUrl(stored)
+      return
+    }
+
+    // 2. Fall back to public /notes/ PDF
+    fetch(publicPdf, { method: 'HEAD' })
+      .then(r => {
+        if (r.ok) {
+          setNotesUrl(publicPdf)
+          setNotesView('viewer')
+        } else {
+          setNotesView('upload')
+        }
+      })
+      .catch(() => setNotesView('upload'))
+  }
+
+  function closeNotes() {
+    setShowNotes(false)
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current)
+      blobUrlRef.current = null
+    }
+    setNotesUrl(null)
+  }
+
+  function handleUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // Reset input so same file can be re-selected after replacing
+    e.target.value = ''
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const b64 = ev.target.result.split(',')[1]
+      try { localStorage.setItem(lsKey, b64) } catch { /* quota exceeded — show without saving */ }
+      openBlobUrl(b64)
+    }
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -240,7 +301,7 @@ export default function TopicPage({ topic, onBack, onModePlay }) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(15,31,61,0.6)', backdropFilter: 'blur(4px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowNotes(false) }}
+          onClick={(e) => { if (e.target === e.currentTarget) closeNotes() }}
         >
           <div
             className="relative rounded-2xl shadow-2xl overflow-hidden flex flex-col"
@@ -255,7 +316,7 @@ export default function TopicPage({ topic, onBack, onModePlay }) {
                 <span className="text-sm font-semibold text-white">My Notes — {topic.label}</span>
               </div>
               <button
-                onClick={() => setShowNotes(false)}
+                onClick={closeNotes}
                 className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors text-white focus:outline-none"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -264,32 +325,68 @@ export default function TopicPage({ topic, onBack, onModePlay }) {
               </button>
             </div>
 
-            {/* PDF content */}
-            <div className="flex-1 overflow-hidden">
-              {pdfExists === null ? (
+            {/* Modal body */}
+            <div className="flex-1 overflow-hidden relative">
+
+              {/* Loading */}
+              {notesView === 'loading' && (
                 <div className="flex items-center justify-center h-full">
                   <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white animate-spin" />
                 </div>
-              ) : pdfExists ? (
-                <iframe
-                  src={notesPdf}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: topic.bg }}>
+              )}
+
+              {/* PDF viewer */}
+              {notesView === 'viewer' && (
+                <>
+                  <iframe
+                    src={notesUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none' }}
+                  />
+                  {/* Replace PDF — bottom-right corner */}
+                  <label className="absolute bottom-4 right-4 cursor-pointer">
+                    <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleUpload} />
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-black/50 text-white/60 hover:text-white hover:bg-black/70 transition-all backdrop-blur-sm select-none">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      Replace PDF
+                    </span>
+                  </label>
+                </>
+              )}
+
+              {/* Upload prompt */}
+              {notesView === 'upload' && (
+                <div className="flex flex-col items-center justify-center h-full gap-6 px-8 text-center">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                    style={{ background: topic.bg }}
+                  >
                     <svg className="w-8 h-8" style={{ color: topic.color }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-white font-semibold mb-1">Notes not uploaded yet.</p>
-                    <p className="text-slate-400 text-sm">Add <code className="text-slate-300 bg-white/10 px-1.5 py-0.5 rounded">{decodeURIComponent(TOPIC_PDF[topic.id])}</code> to the <code className="text-slate-300 bg-white/10 px-1.5 py-0.5 rounded">public/notes/</code> folder.</p>
+                    <p className="text-white font-semibold text-lg mb-1">No notes yet</p>
+                    <p className="text-slate-400 text-sm">Upload a PDF to view your notes for {topic.label}</p>
                   </div>
+                  <label className="cursor-pointer">
+                    <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleUpload} />
+                    <span
+                      className="flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 select-none"
+                      style={{ background: topic.color }}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      Choose PDF
+                    </span>
+                  </label>
                 </div>
               )}
+
             </div>
           </div>
         </div>
