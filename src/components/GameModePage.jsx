@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { TOPICS } from '../data/constants'
 import { QUESTION_BANK } from '../data/questions'
 import { ModeIcon, IconBack } from './Icons'
+import { generateNewQuestions } from '../utils/generateQuestions'
 
 // ─── Vignette selection ────────────────────────────────────────────────────────
 
@@ -42,6 +43,16 @@ function VignetteExam({ scope, onHome }) {
   const [currentVig, setCurrentVig] = useState(0)
   // phase: 'exam' | 'results' | 'review'
   const [phase, setPhase] = useState('exam')
+  const [aiStatus, setAiStatus] = useState('idle') // 'idle' | 'loading' | 'ready'
+
+  useEffect(() => {
+    if (phase !== 'results') return
+    setAiStatus('loading')
+    const topicLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
+    generateNewQuestions(topicLabel, 'vignette')
+      .then(() => setAiStatus('ready'))
+      .catch(() => setAiStatus('idle'))
+  }, [phase])
 
   const totalQuestions = vignettes.reduce((s, v) => s + v.questions.length, 0)
   const totalCorrect   = vignettes.reduce((sum, vig, vi) =>
@@ -130,6 +141,29 @@ function VignetteExam({ scope, onHome }) {
             })}
           </div>
         </div>
+
+        {/* AI regeneration indicator */}
+        {aiStatus !== 'idle' && (
+          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-3">
+            {aiStatus === 'loading' && (
+              <>
+                <svg className="w-3.5 h-3.5 animate-spin text-[#c8a84b]" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                AI generating new questions...
+              </>
+            )}
+            {aiStatus === 'ready' && (
+              <>
+                <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                New questions ready!
+              </>
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -454,8 +488,19 @@ function SuddenDeath({ scope, onHome }) {
   const [feedback,  setFeedback]  = useState(null)      // null | 'correct' | 'wrong'
   const [wrongQ,    setWrongQ]    = useState(null)
   const [bump,      setBump]      = useState(false)
+  const [aiStatus,  setAiStatus]  = useState('idle') // 'idle' | 'loading' | 'ready'
+  const [aiQuestions, setAiQuestions] = useState(null)
 
   const timerRef = useRef(null)
+
+  useEffect(() => {
+    if (phase !== 'gameover') return
+    setAiStatus('loading')
+    const topicLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
+    generateNewQuestions(topicLabel, 'suddenDeath')
+      .then(data => { setAiQuestions(data); setAiStatus('ready') })
+      .catch(() => setAiStatus('idle'))
+  }, [phase])
 
   // Clean up any pending timer on unmount
   useEffect(() => () => clearTimeout(timerRef.current), [])
@@ -486,7 +531,21 @@ function SuddenDeath({ scope, onHome }) {
 
   function restart() {
     clearTimeout(timerRef.current)
-    setQuestions(buildSuddenDeathQuestions(scope))
+    if (aiQuestions) {
+      const topicMeta = TOPICS.find(t => t.id === scope)
+      const enriched = aiQuestions.map(q => ({
+        ...q,
+        topicId:    scope,
+        topicLabel: topicMeta?.label ?? scope,
+        topicColor: topicMeta?.color ?? '#0f1f3d',
+        topicBg:    topicMeta?.bg    ?? '#f5f5f5',
+      }))
+      setQuestions([...enriched].sort(() => Math.random() - 0.5))
+      setAiQuestions(null)
+      setAiStatus('idle')
+    } else {
+      setQuestions(buildSuddenDeathQuestions(scope))
+    }
     setQIndex(0)
     setStreak(0)
     setPhase('playing')
@@ -605,6 +664,29 @@ function SuddenDeath({ scope, onHome }) {
                 <p className="text-[12px] leading-relaxed text-slate-600">{q.explanation}</p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* AI regeneration indicator */}
+        {aiStatus !== 'idle' && (
+          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-3">
+            {aiStatus === 'loading' && (
+              <>
+                <svg className="w-3.5 h-3.5 animate-spin text-[#c8a84b]" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                AI generating new questions...
+              </>
+            )}
+            {aiStatus === 'ready' && (
+              <>
+                <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                New questions ready!
+              </>
+            )}
           </div>
         )}
 
@@ -814,7 +896,18 @@ function FlashcardMatch({ scope, onHome }) {
   const [flipped, setFlipped] = useState(false)
   const [results, setResults] = useState([])           // 'known' | 'unknown' per card
   const [phase,   setPhase]   = useState('playing')    // 'playing' | 'done'
+  const [aiStatus, setAiStatus]   = useState('idle') // 'idle' | 'loading' | 'ready'
+  const [aiQuestions, setAiQuestions] = useState(null)
   const backFaceRef = useRef(null)
+
+  useEffect(() => {
+    if (phase !== 'done') return
+    setAiStatus('loading')
+    const topicLabel = scope === 'all' ? 'All Topics' : (TOPICS.find(t => t.id === scope)?.label ?? scope)
+    generateNewQuestions(topicLabel, 'flashcard')
+      .then(data => { setAiQuestions(data); setAiStatus('ready') })
+      .catch(() => setAiStatus('idle'))
+  }, [phase])
 
   useEffect(() => {
     if (flipped && backFaceRef.current && window.renderMathInElement) {
@@ -853,7 +946,21 @@ function FlashcardMatch({ scope, onHome }) {
   }
 
   function restartAll() {
-    setCards(buildFlashcards(scope))
+    if (aiQuestions) {
+      const meta = TOPICS.find(t => t.id === scope)
+      const enriched = aiQuestions.map(card => ({
+        ...card,
+        topicId:    scope,
+        topicLabel: meta?.label ?? scope,
+        topicColor: meta?.color ?? '#0f1f3d',
+        topicBg:    meta?.bg    ?? '#f5f5f5',
+      }))
+      setCards(enriched)
+      setAiQuestions(null)
+      setAiStatus('idle')
+    } else {
+      setCards(buildFlashcards(scope))
+    }
     setIndex(0)
     setResults([])
     setFlipped(false)
@@ -920,6 +1027,29 @@ function FlashcardMatch({ scope, onHome }) {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* AI regeneration indicator */}
+        {aiStatus !== 'idle' && (
+          <div className="flex items-center gap-2 text-[12px] text-slate-400 mb-3">
+            {aiStatus === 'loading' && (
+              <>
+                <svg className="w-3.5 h-3.5 animate-spin text-[#c8a84b]" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                AI generating new questions...
+              </>
+            )}
+            {aiStatus === 'ready' && (
+              <>
+                <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                New questions ready!
+              </>
+            )}
           </div>
         )}
 
@@ -1322,6 +1452,8 @@ function CrosswordPuzzle({ scope, onHome }) {
   const [history, setHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cfa_crossword_history') || '[]') } catch { return [] }
   })
+  const [showCheck, setShowCheck]       = useState(false)
+  const [checkResult, setCheckResult]   = useState({})
   const gridRef  = useRef(null)
   const secRef   = useRef(0)
   const revRef   = useRef(0)
@@ -1454,19 +1586,23 @@ function CrosswordPuzzle({ scope, onHome }) {
 
   function checkAnswers() {
     if (!puzzle) return
-    const newInput = { ...userInput }
-    const newFb    = { ...feedback }
+    if (showCheck) {
+      setShowCheck(false)
+      setCheckResult({})
+      return
+    }
+    const result = {}
     for (const w of puzzle.placed) {
       cwCells(w).forEach((c, i) => {
         const k = `${c.row},${c.col}`
-        if (newFb[k] === 'revealed') return
-        const typed = newInput[k] || ''
+        if (feedback[k] === 'revealed') return
+        const typed = userInput[k] || ''
         if (!typed) return
-        if (typed === w.answer[i]) { newFb[k] = 'correct' }
-        else { delete newInput[k]; delete newFb[k] }
+        result[k] = typed === w.answer[i] ? 'correct' : 'incorrect'
       })
     }
-    setUserInput(newInput); setFeedback(newFb)
+    setCheckResult(result)
+    setShowCheck(true)
   }
 
   function revealWord() {
@@ -1517,10 +1653,13 @@ function CrosswordPuzzle({ scope, onHome }) {
     const fb = feedback[k]
     const isActive = activeCell?.row === row && activeCell?.col === col
     const inWord   = activeWord && cwCells(activeWord).some(c => c.row === row && c.col === col)
-    if (fb === 'correct')  return '#bbf7d0'
     if (fb === 'revealed') return '#bfdbfe'
+    if (showCheck) {
+      if (checkResult[k] === 'correct')   return '#bbf7d0'
+      if (checkResult[k] === 'incorrect') return '#fecaca'
+    }
     if (isActive)          return '#c8a84b'
-    if (inWord)            return '#dbeafe'
+    if (inWord)            return '#fef9ec'
     return '#faf8f3'
   }
 
@@ -1653,7 +1792,7 @@ function CrosswordPuzzle({ scope, onHome }) {
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
           {[
-            { label: 'Check Answers', action: checkAnswers, dark: false },
+            { label: showCheck ? 'Hide Check' : 'Check Answers', action: checkAnswers, dark: false },
             { label: 'Reveal Word',   action: revealWord,   dark: false },
             { label: 'Reveal All',    action: revealAll,    dark: true  },
           ].map(btn => (
@@ -1726,7 +1865,6 @@ function CrosswordPuzzle({ scope, onHome }) {
             <div key={label}>
               <p style={{ fontSize: 10, letterSpacing: '0.1em', fontWeight: 700, color: '#0f1f3d', marginBottom: 6 }}>{label}</p>
               {words.map(w => {
-                const done   = isWordDone(w)
                 const isAct  = activeWord === w
                 return (
                   <button key={`${prefix}${w.number}`}
@@ -1740,9 +1878,7 @@ function CrosswordPuzzle({ scope, onHome }) {
                   >
                     <span style={{ fontSize: 11, color: isAct ? '#92400e' : '#475569', lineHeight: 1.4 }}>
                       <strong>{w.number}.</strong>{' '}
-                      <span style={{ textDecoration: done ? 'line-through' : 'none', opacity: done ? 0.4 : 1 }}>
-                        {w.clue}
-                      </span>
+                      {w.clue}
                     </span>
                   </button>
                 )
